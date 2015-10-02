@@ -95,7 +95,7 @@ UA_ICON = 30001
 HELP_TEXT = "Sketchfab Exporter v" + __version__
 SETTINGS = "com.990adjustments.SketchfabExport"
 SKETCHFAB_URL = "https://api.sketchfab.com/v1/models"
-COLLADA14 = 1022316
+FBX20142 = 1026370
 
 WRITEPATH = os.path.join(storage.GeGetStartupWritePath(), 'Sketchfab')
 FILEPATH = os.path.join(WRITEPATH, SETTINGS)
@@ -144,7 +144,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
 
         :param string path: path of root directory
         :param object zipObject: the zip object
-        :param string title: the name of the .dae file with extension
+        :param string title: the name of the .fbx file with extension
         """
 
         include = ['tex']
@@ -153,7 +153,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
             for file in files:
                 if file.startswith('.'):
                     continue
-                if file.endswith('.dae'.lower()) and file == title:
+                if file.endswith('.fbx'.lower()) and file == title:
                     zipObject.write(os.path.join(root, file))
 
         # zip textures in tex directory
@@ -185,11 +185,11 @@ class PublishModelThread(threading.Thread):
         print("\nUpload started on {0}".format(t))
         print("Exporting...\n")
 
-        exportFile = os.path.join(self.activeDocPath, self.title + '.dae')
+        exportFile = os.path.join(self.activeDocPath, self.title + '.fbx')
 
         # COLLADA 1.4
         documents.SaveDocument(self.activeDoc, exportFile,
-                               c4d.SAVEDOCUMENTFLAGS_DONTADDTORECENTLIST, COLLADA14)
+                               c4d.SAVEDOCUMENTFLAGS_DONTADDTORECENTLIST, FBX20142)
 
         if not os.path.exists(exportFile):
             g_uploaded = False
@@ -204,7 +204,7 @@ class PublishModelThread(threading.Thread):
         os.chdir(basepath)
 
         zip = zipfile.ZipFile(archiveName, 'w')
-        Utilities.ESZipdir(dirname, zip, self.title+'.dae')
+        Utilities.ESZipdir(dirname, zip, self.title+'.fbx')
         zip.close()
 
         self.data['fileModel'] = open(archiveName, 'rb')
