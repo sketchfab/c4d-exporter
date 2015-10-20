@@ -97,6 +97,21 @@ SETTINGS = "com.990adjustments.SketchfabExport"
 SKETCHFAB_URL = "https://api.sketchfab.com/v1/models"
 FBX20142 = 1026370
 
+export_options = {c4d.FBXEXPORT_LIGHTS: 1,
+                  c4d.FBXEXPORT_CAMERAS: 0,
+                  c4d.FBXEXPORT_SPLINES: 1,
+                  # Geometry and Materials
+                  c4d.FBXEXPORT_SAVE_NORMALS: 1,
+                  c4d.FBXEXPORT_TEXTURES: 1,
+                  c4d.FBXEXPORT_EMBED_TEXTURES: 1,
+                  c4d.FBXEXPORT_FBX_VERSION: c4d.FBX_EXPORTVERSION_NATIVE,
+                  # cancel all these one
+                  c4d.FBXEXPORT_PLA_TO_VERTEXCACHE: 0,
+                  c4d.FBXEXPORT_SAVE_VERTEX_MAPS_AS_COLORS: 0,
+                  c4d.FBXEXPORT_TRIANGULATE: 0,
+                  c4d.FBXEXPORT_SDS_SUBDIVISION: 0,
+                  c4d.FBXEXPORT_ASCII: 0}
+
 WRITEPATH = os.path.join(storage.GeGetStartupWritePath(), 'Sketchfab')
 FILEPATH = os.path.join(WRITEPATH, SETTINGS)
 
@@ -187,9 +202,22 @@ class PublishModelThread(threading.Thread):
 
         exportFile = os.path.join(self.activeDocPath, self.title + '.fbx')
 
-        # COLLADA 1.4
+        options = self.get_fbxexport_options()
+        backup_options = {}
+
+        for key in export_options:
+            if options[key] != export_options[key]:
+                backup_options[key] = options[key]
+
+            options[key] = export_options[key]
+
+        # FBX Export
         documents.SaveDocument(self.activeDoc, exportFile,
                                c4d.SAVEDOCUMENTFLAGS_DONTADDTORECENTLIST, FBX20142)
+
+        # restore options
+        for key in backup_options:
+            options[key] = backup_options[key]
 
         if not os.path.exists(exportFile):
             g_uploaded = False
@@ -233,6 +261,17 @@ class PublishModelThread(threading.Thread):
             # Clean up
             self.cleanup_files(archiveName, exportFile)
             c4d.SpecialEventAdd(__plugin_id__)
+
+    def get_fbxexport_options(self):
+        ''' Set the good options for fbx export to Sketchfab '''
+        # Get the fbx export plugin
+        fbxplugin = plugins.FindPlugin(1026370, c4d.PLUGINTYPE_SCENESAVER)
+        if not fbxplugin:
+            return
+        # Access the plugin options
+        reply = {}
+        if fbxplugin.Message(c4d.MSG_RETRIEVEPRIVATEDATA, reply):
+                return reply.get('imexporter')
 
     def cleanup_files(self, archive_name=None, export_file=None):
         if archive_name and os.path.exists(archive_name):
