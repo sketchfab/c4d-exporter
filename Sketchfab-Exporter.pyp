@@ -78,6 +78,7 @@ CHK_PRIVATE = 100014
 BTN_THUMB_SRC_PATH = 100015
 EDITXT_THUMB_SRC_PATH = 100015
 EDITXT_PASSWORD = 100016
+CHK_ANIMATION = 100017
 
 GROUP_WRAPPER = 20000
 GROUP_ONE = 20001
@@ -181,12 +182,13 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
 class PublishModelThread(threading.Thread):
     """Class that publishes 3D model to Sketchfab.com."""
 
-    def __init__(self, data, title, activeDoc, activeDocPath):
+    def __init__(self, data, title, activeDoc, activeDocPath, enable_animation):
         threading.Thread.__init__(self)
         self.data = data
         self.title = title
         self.activeDoc = activeDoc
         self.activeDocPath = activeDocPath
+        self.enable_animation = enable_animation
 
     def run(self):
         global g_uploaded
@@ -204,6 +206,9 @@ class PublishModelThread(threading.Thread):
 
         options = self.get_fbxexport_options()
         backup_options = {}
+
+        export_options[c4d.FBXEXPORT_TRACKS] = self.enable_animation
+        export_options[c4d.FBXEXPORT_BAKE_ALL_FRAMES] = self.enable_animation
 
         for key in export_options:
             if options[key] != export_options[key]:
@@ -488,6 +493,9 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_SCALEFIT,
                          initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
 
+        self.AddCheckbox(id=CHK_ANIMATION, flags=c4d.BFH_RIGHT,
+                         initw=0, inith=0, name="Enable animation")
+
         self.GroupEnd()
 
         self.AddSeparatorH(inith=0, flags=c4d.BFH_FIT)
@@ -670,6 +678,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             token = self.GetString(EDITXT_API_TOKEN)
             private = self.GetBool(CHK_PRIVATE)
             password = self.GetString(EDITXT_PASSWORD)
+            enable_animation = self.GetBool(CHK_ANIMATION)
 
             if '-' in token:
                 try:
@@ -733,7 +742,7 @@ Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
 
             # Start Multithread operations
             # pass on data
-            self.publish = PublishModelThread(data, title, activeDoc, activeDocPath)
+            self.publish = PublishModelThread(data, title, activeDoc, activeDocPath, enable_animation)
             self.publish.setDaemon(True)
             self.publish.start()
 
