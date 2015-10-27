@@ -486,7 +486,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
         self.GroupSpace(10, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
-        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="   Tags:")
+        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="   Tags: cinema4d ")
         self.AddEditText(id=EDITXT_TAGS, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
 
         self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="    API token:")
@@ -725,8 +725,9 @@ Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
             if len(description) != 0:
                 data['description'] = description
 
+            data['tags'] = 'cinema4d '
             if len(tags) != 0:
-                data['tags'] = tags
+                data['tags'] += tags
 
             data['title'] = title
             data['token'] = api_token
@@ -742,6 +743,7 @@ Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
 
             # Start Multithread operations
             # pass on data
+            data['source'] = 'cinema4d'
             self.publish = PublishModelThread(data, title, activeDoc, activeDocPath, enable_animation)
             self.publish.setDaemon(True)
             self.publish.start()
