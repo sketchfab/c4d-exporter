@@ -57,7 +57,7 @@ __sketchfab__ = "http://sketchfab.com"
 __twitter__ = "@990adjustments"
 __email__ = "hi@990adjustments.com"
 __plugin_title__ = "Sketchfab Exporter"
-__version__ = "1.2.2"
+__version__ = "1.3.0"
 __copyright_year__ = datetime.datetime.now().year
 __plugin_id__ = 1029390
 
