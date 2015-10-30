@@ -79,6 +79,7 @@ BTN_THUMB_SRC_PATH = 100015
 EDITXT_THUMB_SRC_PATH = 100015
 EDITXT_PASSWORD = 100016
 CHK_ANIMATION = 100017
+CHK_AUTOPUBLISH = 100018
 
 GROUP_WRAPPER = 20000
 GROUP_ONE = 20001
@@ -379,6 +380,8 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                            initw=0, inith=0, name="Password (optional):    ")
         self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT,
                          initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddCheckbox(id=CHK_AUTOPUBLISH, flags=c4d.BFH_LEFT,
+                         initw=0, inith=0, name="Auto-publish model")
 
     def groupFiveWillRedraw(self):
         self.LayoutFlushGroup(GROUP_FIVE)
@@ -679,6 +682,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             private = self.GetBool(CHK_PRIVATE)
             password = self.GetString(EDITXT_PASSWORD)
             enable_animation = self.GetBool(CHK_ANIMATION)
+            auto_publish = self.GetBool(CHK_AUTOPUBLISH)
 
             if '-' in token:
                 try:
@@ -744,6 +748,8 @@ Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
             # Start Multithread operations
             # pass on data
             data['source'] = 'cinema4d'
+            data['isPublished'] = auto_publish
+
             self.publish = PublishModelThread(data, title, activeDoc, activeDocPath, enable_animation)
             self.publish.setDaemon(True)
             self.publish.start()
