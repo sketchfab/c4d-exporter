@@ -15,22 +15,15 @@ Modified Date: 03/16/13
 import c4d
 from c4d import documents, gui, plugins, bitmaps, storage
 
-import time
 import datetime
-import sys
 import os
 import json
-import base64
 import urllib2
 import shelve
-import logging
 import webbrowser
 import zipfile
 import threading
 
-
-
-#logging.basicConfig(level=logging.DEBUG)
 
 # Install and import the poster modules.
 try:
@@ -51,64 +44,81 @@ except ImportError, err:
         zf.extractall(pythonPath)
         zf.close()
     except Exception, err:
-        gui.MessageDialog("Unable to install necessary files. Please check the help for information on manual module installation.", c4d.GEMB_OK)
+        gui.MessageDialog("Unable to install necessary files. "
+                          "Please check the help for information on manual module installation.", c4d.GEMB_OK)
     else:
         from poster.encode import multipart_encode
         from poster.streaminghttp import register_openers
 
 
+__author__ = "Erwin Santacruz"
+__website__ = "http://990adjustments.com"
+__sketchfab__ = "http://sketchfab.com"
+__twitter__ = "@990adjustments"
+__email__ = "hi@990adjustments.com"
+__plugin_title__ = "Sketchfab Exporter"
+__version__ = "1.3.0"
+__copyright_year__ = datetime.datetime.now().year
+__plugin_id__ = 1029390
 
-__author__                  = "Erwin Santacruz"
-__website__                 = "http://990adjustments.com"
-__sketchfab__               = "http://sketchfab.com"
-__twitter__                 = "@990adjustments"
-__email__                   = "hi@990adjustments.com"
-__plugin_title__            = "Sketchfab Exporter"
-__version__                 = "1.2.2"
-__copyright_year__          = datetime.datetime.now().year
-__plugin_id__               = 1029390
+BTN_ABOUT = 100001
+BTN_WEB = 100002
+TXT_MODEL_NAME = 100003
+EDITXT_MODEL_TITLE = 100004
+TXT_DESCRIPTION = 100005
+EDITXT_DESCRIPTION = 100006
+TXT_TAGS = 100007
+EDITXT_TAGS = 100008
+TXT_API_TOKEN = 100009
+EDITXT_API_TOKEN = 100010
+BTN_PUBLISH = 100011
+MENU_SAVE_API_TOKEN = 100012
+BTN_WEB_990 = 100013
+CHK_PRIVATE = 100014
+BTN_THUMB_SRC_PATH = 100015
+EDITXT_THUMB_SRC_PATH = 100015
+EDITXT_PASSWORD = 100016
+CHK_ANIMATION = 100017
+CHK_AUTOPUBLISH = 100018
 
-BTN_ABOUT                   = 100001
-BTN_WEB                     = 100002
-TXT_MODEL_NAME              = 100003
-EDITXT_MODEL_TITLE          = 100004
-TXT_DESCRIPTION             = 100005
-EDITXT_DESCRIPTION          = 100006
-TXT_TAGS                    = 100007
-EDITXT_TAGS                 = 100008
-TXT_API_TOKEN               = 100009
-EDITXT_API_TOKEN            = 100010
-BTN_PUBLISH                 = 100011
-MENU_SAVE_API_TOKEN         = 100012
-BTN_WEB_990                 = 100013
-CHK_PRIVATE                 = 100014
-BTN_THUMB_SRC_PATH          = 100015
-EDITXT_THUMB_SRC_PATH       = 100015
-EDITXT_PASSWORD             = 100016
+GROUP_WRAPPER = 20000
+GROUP_ONE = 20001
+GROUP_TWO = 20002
+GROUP_THREE = 20003
+GROUP_FOUR = 20004
+GROUP_FIVE = 20005
+GROUP_SIX = 20006
 
-GROUP_WRAPPER               = 20000
-GROUP_ONE                   = 20001
-GROUP_TWO                   = 20002
-GROUP_THREE                 = 20003
-GROUP_FOUR                  = 20004
-GROUP_FIVE                  = 20005
-GROUP_SIX                   = 20006
-
-UA_HEADER                   = 30000
-UA_ICON                     = 30001
+UA_HEADER = 30000
+UA_ICON = 30001
 
 
-#Constants
+# Constants
 HELP_TEXT = "Sketchfab Exporter v" + __version__
 SETTINGS = "com.990adjustments.SketchfabExport"
 SKETCHFAB_URL = "https://api.sketchfab.com/v1/models"
-COLLADA14 = 1022316
+FBX20142 = 1026370
+
+export_options = {c4d.FBXEXPORT_LIGHTS: 1,
+                  c4d.FBXEXPORT_CAMERAS: 0,
+                  c4d.FBXEXPORT_SPLINES: 1,
+                  # Geometry and Materials
+                  c4d.FBXEXPORT_SAVE_NORMALS: 1,
+                  c4d.FBXEXPORT_TEXTURES: 1,
+                  c4d.FBXEXPORT_EMBED_TEXTURES: 1,
+                  c4d.FBXEXPORT_FBX_VERSION: c4d.FBX_EXPORTVERSION_NATIVE,
+                  # cancel all these one
+                  c4d.FBXEXPORT_PLA_TO_VERTEXCACHE: 0,
+                  c4d.FBXEXPORT_SAVE_VERTEX_MAPS_AS_COLORS: 0,
+                  c4d.FBXEXPORT_TRIANGULATE: 0,
+                  c4d.FBXEXPORT_SDS_SUBDIVISION: 0,
+                  c4d.FBXEXPORT_ASCII: 0}
 
 WRITEPATH = os.path.join(storage.GeGetStartupWritePath(), 'Sketchfab')
 FILEPATH = os.path.join(WRITEPATH, SETTINGS)
 
 if not os.path.exists(WRITEPATH):
- os.mkdir(WRITEPATH)
+    os.mkdir(WRITEPATH)
 
 # Globals
 g_uploaded = False
@@ -116,13 +126,11 @@ g_error = ""
 g_lastUpdated = ""
 
 
-
 class Utilities(object):
     """Several helper methods."""
 
     def __init__(self, arg):
         super(Utilities, self).__init__()
-
 
     @staticmethod
     def ESOpen_website(site):
@@ -138,7 +146,14 @@ class Utilities(object):
         """Show About information dialog box."""
 
         gui.MessageDialog("{0} v{1}\nCopyright (C) {2} {3}\nAll rights reserved.\n\nWeb:      {4}\nTwitter:  {5}\nEmail:    {6}\n\n\
-This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp://www.gnu.org/licenses/gpl.html".format(__plugin_title__, __version__, __copyright_year__, __author__, __website__, __twitter__, __email__), c4d.GEMB_OK)
+This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp://www.gnu.org/licenses/gpl.html"
+                          .format(__plugin_title__,
+                                  __version__,
+                                  __copyright_year__,
+                                  __author__,
+                                  __website__,
+                                  __twitter__,
+                                  __email__), c4d.GEMB_OK)
 
     @staticmethod
     def ESZipdir(path, zipObject, title):
@@ -146,7 +161,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
 
         :param string path: path of root directory
         :param object zipObject: the zip object
-        :param string title: the name of the .dae file with extension
+        :param string title: the name of the .fbx file with extension
         """
 
         include = ['tex']
@@ -155,26 +170,26 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
             for file in files:
                 if file.startswith('.'):
                     continue
-                if file.endswith('.dae'.lower()) and file == title:
+                if file.endswith('.fbx'.lower()) and file == title:
                     zipObject.write(os.path.join(root, file))
 
         # zip textures in tex directory
-        texDir = os.path.join(path,'tex');
+        texDir = os.path.join(path, 'tex')
         if os.path.exists(texDir):
             for f in os.listdir(texDir):
                 zipObject.write(os.path.join(path, 'tex', f))
 
 
-
 class PublishModelThread(threading.Thread):
     """Class that publishes 3D model to Sketchfab.com."""
 
-    def __init__(self, data, title, activeDoc, activeDocPath):
+    def __init__(self, data, title, activeDoc, activeDocPath, enable_animation):
         threading.Thread.__init__(self)
         self.data = data
         self.title = title
         self.activeDoc = activeDoc
         self.activeDocPath = activeDocPath
+        self.enable_animation = enable_animation
 
     def run(self):
         global g_uploaded
@@ -182,16 +197,33 @@ class PublishModelThread(threading.Thread):
 
         # Need to work on this some more
         time_start = datetime.datetime.now()
-        #t = time_start.strftime("%a %b %d %I:%M %p")
+        # t = time_start.strftime("%a %b %d %I:%M %p")
         t = time_start.strftime("%c")
 
         print("\nUpload started on {0}".format(t))
         print("Exporting...\n")
 
-        exportFile = os.path.join(self.activeDocPath, self.title + '.dae')
+        exportFile = os.path.join(self.activeDocPath, self.title + '.fbx')
 
-        # COLLADA 1.4
-        documents.SaveDocument(self.activeDoc, exportFile, c4d.SAVEDOCUMENTFLAGS_DONTADDTORECENTLIST, COLLADA14)
+        options = self.get_fbxexport_options()
+        backup_options = {}
+
+        export_options[c4d.FBXEXPORT_TRACKS] = self.enable_animation
+        export_options[c4d.FBXEXPORT_BAKE_ALL_FRAMES] = self.enable_animation
+
+        for key in export_options:
+            if options[key] != export_options[key]:
+                backup_options[key] = options[key]
+
+            options[key] = export_options[key]
+
+        # FBX Export
+        documents.SaveDocument(self.activeDoc, exportFile,
+                               c4d.SAVEDOCUMENTFLAGS_DONTADDTORECENTLIST, FBX20142)
+
+        # restore options
+        for key in backup_options:
+            options[key] = backup_options[key]
 
         if not os.path.exists(exportFile):
             g_uploaded = False
@@ -201,24 +233,12 @@ class PublishModelThread(threading.Thread):
 
         print("Export successful.")
 
-        # Check size of file
-        #if os.stat(exportFile).st_size / 1048576 > 49:
-        #    g_uploaded = False
-        #    g_error = "File is too large. Your file is over 50MB."
-
-            # Clean up
-            #logging.debug("Cleaning up...")
-        #    self.cleanup_files(export_file=exportFile)
-        #    c4d.SpecialEventAdd(__plugin_id__)
-        #    return False
-
         basepath, dirname = os.path.split(self.activeDocPath)
         archiveName = self.title + '.zip'
-        texturePath = os.path.join(self.activeDocPath, 'tex')
         os.chdir(basepath)
 
         zip = zipfile.ZipFile(archiveName, 'w')
-        Utilities.ESZipdir(dirname, zip, self.title+'.dae')
+        Utilities.ESZipdir(dirname, zip, self.title+'.fbx')
         zip.close()
 
         self.data['fileModel'] = open(archiveName, 'rb')
@@ -245,25 +265,32 @@ class PublishModelThread(threading.Thread):
 
         finally:
             # Clean up
-            #logging.debug("Cleaning up...")
             self.cleanup_files(archiveName, exportFile)
             c4d.SpecialEventAdd(__plugin_id__)
+
+    def get_fbxexport_options(self):
+        ''' Set the good options for fbx export to Sketchfab '''
+        # Get the fbx export plugin
+        fbxplugin = plugins.FindPlugin(1026370, c4d.PLUGINTYPE_SCENESAVER)
+        if not fbxplugin:
+            return
+        # Access the plugin options
+        reply = {}
+        if fbxplugin.Message(c4d.MSG_RETRIEVEPRIVATEDATA, reply):
+                return reply.get('imexporter')
 
     def cleanup_files(self, archive_name=None, export_file=None):
         if archive_name and os.path.exists(archive_name):
             try:
-                #logging.debug("Removing file {0}".format(archive_name))
                 os.remove(archive_name)
-            except Exception as err:
+            except Exception:
                 print("Unable to remove file {0}".format(archive_name))
 
         if export_file and os.path.exists(export_file):
             try:
-                #logging.debug("Removing file {0}".format(export_file))
                 os.remove(export_file)
-            except Exception as err:
+            except Exception:
                 print("Unable to remove file {0}".format(export_file))
-
 
 
 class UserAreaPathsHeader(gui.GeUserArea):
@@ -277,7 +304,7 @@ class UserAreaPathsHeader(gui.GeUserArea):
         return (self.width, self.height)
 
     def DrawMsg(self, x1, y1, x2, y2, msg):
-        thisFile = os.path.abspath( __file__ )
+        thisFile = os.path.abspath(__file__)
         thisDirectory = os.path.dirname(thisFile)
         path = os.path.join(thisDirectory, "res", "header.png")
         result, ismovie = self.bmp.InitWith(path)
@@ -287,10 +314,11 @@ class UserAreaPathsHeader(gui.GeUserArea):
         y2 = self.bmp.GetBh()
 
         if result == c4d.IMAGERESULT_OK:
-            self.DrawBitmap(self.bmp, 0, 0, self.bmp.GetBw(), self.bmp.GetBh(), x1, y1, x2, y2, c4d.BMP_NORMALSCALED | c4d.BMP_ALLOWALPHA)
+            self.DrawBitmap(self.bmp, 0, 0, self.bmp.GetBw(), self.bmp.GetBh(),
+                            x1, y1, x2, y2, c4d.BMP_NORMALSCALED | c4d.BMP_ALLOWALPHA)
 
     def Redraw(self):
-        thisFile = os.path.abspath( __file__ )
+        thisFile = os.path.abspath(__file__)
         thisDirectory = os.path.dirname(thisFile)
         path = os.path.join(thisDirectory, "res", "header.png")
         result, ismovie = self.bmp.InitWith(path)
@@ -300,7 +328,8 @@ class UserAreaPathsHeader(gui.GeUserArea):
         y2 = self.bmp.GetBh()
 
         if result == c4d.IMAGERESULT_OK:
-            self.DrawBitmap(self.bmp, 0, 0, self.bmp.GetBw(), self.bmp.GetBh(), x1, y1, x2, y2, c4d.BMP_NORMALSCALED | c4d.BMP_ALLOWALPHA)
+            self.DrawBitmap(self.bmp, 0, 0, self.bmp.GetBw(), self.bmp.GetBh(),
+                            x1, y1, x2, y2, c4d.BMP_NORMALSCALED | c4d.BMP_ALLOWALPHA)
 
 
 class MainDialog(gui.GeDialog):
@@ -317,17 +346,16 @@ class MainDialog(gui.GeDialog):
         global g_lastUpdated
 
         print("\n{0} v{1} loaded. Copyright (C) {2} {3}. All rights reserved.\n\n\
-This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http://www.gnu.org/licenses/gpl.html\n\n".format(__plugin_title__, __version__, __copyright_year__, __author__))
+This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http://www.gnu.org/licenses/gpl.html\n\n"
+              .format(__plugin_title__, __version__, __copyright_year__, __author__))
 
         try:
-            #logging.debug("Checking for prefs file")
             prefs = shelve.open(FILEPATH, 'r')
 
             if 'api_token' in prefs:
                 if prefs['api_token']:
                     self.MenuInitString(MENU_SAVE_API_TOKEN, True, True)
                     self.save_api_token = True
-                    token = prefs['api_token']
                     self.SetString(EDITXT_API_TOKEN, '-' * len(prefs['api_token']))
                 else:
                     self.MenuInitString(MENU_SAVE_API_TOKEN, True, False)
@@ -346,9 +374,14 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         return True
 
     def createGroupFiveItems(self):
-        self.AddCheckbox(id=CHK_PRIVATE, flags=c4d.BFH_SCALEFIT | c4d.BFH_LEFT, initw=0, inith=0, name="Private Model (Pro User Only)")
-        self.AddStaticText(id=0, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Password (optional):    ")
-        self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT, initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddCheckbox(id=CHK_PRIVATE, flags=c4d.BFH_SCALEFIT | c4d.BFH_LEFT,
+                         initw=0, inith=0, name="Private Model (Pro User Only)")
+        self.AddStaticText(id=0, flags=c4d.BFH_LEFT,
+                           initw=0, inith=0, name="Password (optional):    ")
+        self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT,
+                         initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddCheckbox(id=CHK_AUTOPUBLISH, flags=c4d.BFH_LEFT,
+                         initw=0, inith=0, name="Auto-publish model")
 
     def groupFiveWillRedraw(self):
         self.LayoutFlushGroup(GROUP_FIVE)
@@ -393,12 +426,12 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
         self.MenuFinished()
 
-        #----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Begin WRAPPER
-        #----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
 
         self.GroupBegin(id=GROUP_WRAPPER,
-                        flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
+                        flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT,
                         cols=1,
                         rows=1,
                         title="Wrapper",
@@ -442,8 +475,10 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.GroupSpace(10, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
 
-        self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_RIGHT | c4d.BFV_TOP, initw=0, inith=0, name=" Description: ")
-        self.AddMultiLineEditText(id=EDITXT_DESCRIPTION, flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, initw=0, inith=100, style=c4d.DR_MULTILINE_MONOSPACED)
+        self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_RIGHT | c4d.BFV_TOP,
+                           initw=0, inith=0, name=" Description: ")
+        self.AddMultiLineEditText(id=EDITXT_DESCRIPTION, flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT,
+                                  initw=0, inith=100, style=c4d.DR_MULTILINE_MONOSPACED)
 
         self.GroupEnd()
 
@@ -454,14 +489,17 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
         self.GroupSpace(10, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
-        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="   Tags:")
+        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="   Tags: cinema4d ")
         self.AddEditText(id=EDITXT_TAGS, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
 
         self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="    API token:")
-        self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_SCALEFIT, initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_SCALEFIT,
+                         initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+
+        self.AddCheckbox(id=CHK_ANIMATION, flags=c4d.BFH_RIGHT,
+                         initw=0, inith=0, name="Enable animation")
 
         self.GroupEnd()
-
 
         self.AddSeparatorH(inith=0, flags=c4d.BFH_FIT)
 
@@ -475,16 +513,19 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.GroupBorderSpace(6, 6, 6, 6)
 
         self.groupFiveWillRedraw()
-        #self.AddCheckbox(id=CHK_PRIVATE, flags=c4d.BFH_SCALEFIT | c4d.BFH_LEFT, initw=0, inith=0, name="Private Model (Pro User Only)")
-        #self.AddStaticText(id=0, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Password (optional):    ")
-        #self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT, initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        # self.AddCheckbox(id=CHK_PRIVATE, flags=c4d.BFH_SCALEFIT | c4d.BFH_LEFT,
+        #                  initw=0, inith=0, name="Private Model (Pro User Only)")
+        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT,
+        #                    initw=0, inith=0, name="Password (optional):    ")
+        # self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT,
+        #                  initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
 
         self.GroupEnd()
 
         self.AddSeparatorH(inith=0, flags=c4d.BFH_FIT)
-        #self.AddStaticText(id=0, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Thumbnail:")
-        #self.AddEditText(id=EDITXT_THUMB_SRC_PATH, flags=c4d.BFH_SCALEFIT, initw=300, inith=12)
-        #self.AddButton(id=BTN_THUMB_SRC_PATH, flags=c4d.BFH_RIGHT, initw=30, inith=12, name="...")
+        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Thumbnail:")
+        # self.AddEditText(id=EDITXT_THUMB_SRC_PATH, flags=c4d.BFH_SCALEFIT, initw=300, inith=12)
+        # self.AddButton(id=BTN_THUMB_SRC_PATH, flags=c4d.BFH_RIGHT, initw=30, inith=12, name="...")
 
         self.GroupBegin(id=GROUP_SIX,
                         flags=c4d.BFH_SCALEFIT | c4d.BFV_BOTTOM,
@@ -495,16 +536,16 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.GroupBorderSpace(6, 6, 6, 6)
 
         self.groupSixWillRedraw()
-        #self.AddStaticText(id=0, flags=c4d.BFH_LEFT | c4d.BFH_SCALEFIT, initw=0, inith=0, name=g_lastUpdated)
-        #self.AddButton(id=BTN_PUBLISH, flags=c4d.BFH_RIGHT | c4d.BFV_BOTTOM, initw=75, inith=16, name="Publish")
+        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT | c4d.BFH_SCALEFIT, initw=0, inith=0, name=g_lastUpdated)
+        # self.AddButton(id=BTN_PUBLISH, flags=c4d.BFH_RIGHT | c4d.BFV_BOTTOM, initw=75, inith=16, name="Publish")
 
         self.GroupEnd()
 
         self.GroupEnd()
 
-        #----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # End WRAPPER
-        #----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         return True
 
     def setApiToken(self, _setApiToken, _api_token=None):
@@ -519,14 +560,12 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 prefs = shelve.open(FILEPATH, 'c')
                 prefs['api_token'] = _api_token
                 prefs.close()
-                #logging.debug("API token successfully saved.")
             except Exception, err:
                 print("Could not save API token. Reason: {0}".format(err))
         else:
             # delete settings
             try:
                 os.remove(FILEPATH + '.db')
-                #logging.debug("API token successfully removed.")
                 self.SetString(EDITXT_API_TOKEN, "")
             except Exception, err:
                 print("Unable to delete settings. Reason: {0}".format(err))
@@ -542,7 +581,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             c4d.StatusSetBar(100)
 
             time_start = datetime.datetime.now()
-            #t = time_start.strftime("%a %b %d %I:%M %p")
+            # t = time_start.strftime("%a %b %d %I:%M %p")
             t = time_start.strftime("%c")
 
             try:
@@ -589,7 +628,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         global g_lastUpdated
 
         if id == MENU_SAVE_API_TOKEN:
-            if self.save_api_token == True:
+            if self.save_api_token:
                 self.MenuInitString(MENU_SAVE_API_TOKEN, True, False)
                 self.save_api_token = False
                 self.setApiToken(False)
@@ -607,7 +646,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             Utilities.ESOpen_website(__website__)
 
         if id == BTN_THUMB_SRC_PATH:
-            selected = storage.LoadDialog(type = c4d.FILESELECTTYPE_ANYTHING)
+            selected = storage.LoadDialog(type=c4d.FILESELECTTYPE_ANYTHING)
             if not selected:
                 return False
             else:
@@ -642,6 +681,8 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             token = self.GetString(EDITXT_API_TOKEN)
             private = self.GetBool(CHK_PRIVATE)
             password = self.GetString(EDITXT_PASSWORD)
+            enable_animation = self.GetBool(CHK_ANIMATION)
+            auto_publish = self.GetBool(CHK_AUTOPUBLISH)
 
             if '-' in token:
                 try:
@@ -677,7 +718,8 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 return False
 
             if len(api_token) == 0:
-                gui.MessageDialog("Please enter your API token. Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
+                gui.MessageDialog("Please enter your API token. \
+Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
                 self.Enable(BTN_PUBLISH, True)
                 self.SetTitle(__plugin_title__)
                 c4d.StatusClear()
@@ -687,8 +729,9 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             if len(description) != 0:
                 data['description'] = description
 
+            data['tags'] = 'cinema4d '
             if len(tags) != 0:
-                data['tags'] = tags
+                data['tags'] += tags
 
             data['title'] = title
             data['token'] = api_token
@@ -704,12 +747,14 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
             # Start Multithread operations
             # pass on data
-            self.publish = PublishModelThread(data, title, activeDoc, activeDocPath)
+            data['source'] = 'cinema4d'
+            data['isPublished'] = auto_publish
+
+            self.publish = PublishModelThread(data, title, activeDoc, activeDocPath, enable_animation)
             self.publish.setDaemon(True)
             self.publish.start()
 
         return True
-
 
 
 class SketchfabExporter(plugins.CommandData):
@@ -717,26 +762,26 @@ class SketchfabExporter(plugins.CommandData):
 
     dialog = None
 
-    def Execute(self,doc):
+    def Execute(self, doc):
         # Check C4D version
         if c4d.GetC4DVersion() < 15000 and c4d.GeGetCurrentOS() == c4d.OPERATINGSYSTEM_WIN:
-            c4d.gui.MessageDialog("Sorry, but the plugin is incompatible with the version of Cinema 4D you are currently running.\n\nThe Sketchfab plugin for Windows requires\nCinema 4D R15 or greater.", c4d.GEMB_OK)
+            c4d.gui.MessageDialog("Sorry, but the plugin is incompatible with the version of Cinema 4D you are currently running.\n\n\
+The Sketchfab plugin for Windows requires\nCinema 4D R15 or greater.", c4d.GEMB_OK)
             return False
 
         if self.dialog is None:
             self.dialog = MainDialog()
 
-        return self.dialog.Open(dlgtype = c4d.DLG_TYPE_ASYNC,
-                                pluginid = __plugin_id__,
-                                defaultw = 600,
-                                defaulth = 450)
+        return self.dialog.Open(dlgtype=c4d.DLG_TYPE_ASYNC,
+                                pluginid=__plugin_id__,
+                                defaultw=600,
+                                defaulth=450)
 
     def RestoreLayout(self, sec_ref):
         if self.dialog is None:
             self.dialog = MainDialog()
 
-        return self.dialog.Restore(pluginid = __plugin_id__, secret = sec_ref)
-
+        return self.dialog.Restore(pluginid=__plugin_id__, secret=sec_ref)
 
 
 if __name__ == "__main__":
@@ -745,10 +790,9 @@ if __name__ == "__main__":
     iconPath = os.path.join(dir, "res", "icon.png")
     icon.InitWith(iconPath)
 
-    plugins.RegisterCommandPlugin(id = __plugin_id__,
-                                  str = __plugin_title__,
-                                  info = 0, 
-                                  help = HELP_TEXT,
-                                  dat = SketchfabExporter(),
-                                  icon = icon)
-
+    plugins.RegisterCommandPlugin(id=__plugin_id__,
+                                  str=__plugin_title__,
+                                  info=0,
+                                  help=HELP_TEXT,
+                                  dat=SketchfabExporter(),
+                                  icon=icon)
