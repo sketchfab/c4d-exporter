@@ -250,12 +250,16 @@ class PublishModelThread(threading.Thread):
             register_openers()
 
             post_data, headers = multipart_encode(self.data)
-            req = urllib2.Request(SKETCHFAB_URL, post_data, headers)
-            response = urllib2.urlopen(req)
+            req = urllib2.Request(SKETCHFAB_URL, post_data, headers, unverifiable=False)
+            response = urllib2.urlopen(url=req)
+            json_response = json.loads(str(response.read()))
 
-            if response and json.loads(str(response.read()))["success"]:
+            if response and json_response["success"]:
+                model_id = json_response['result']['id']
                 response.close()
                 g_uploaded = True
+                # Open website on model page
+                Utilities.ESOpen_website(__sketchfab__ + '/models/' + model_id)
             else:
                 g_error = "Invalid response from server."
 
@@ -587,7 +591,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             try:
                 prefs = shelve.open(FILEPATH, 'c')
             except Exception as err:
-                print("\nUnable to load prefereces. Reason: ".format(err))
+                print("\nUnable to load preferences. Reason: ".format(err))
 
             if g_uploaded:
                 gui.MessageDialog("Your model was succesfully uploaded to Sketchfab.com.", c4d.GEMB_OK)
