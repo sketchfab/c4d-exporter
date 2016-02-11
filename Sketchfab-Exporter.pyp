@@ -79,7 +79,7 @@ BTN_THUMB_SRC_PATH = 100015
 EDITXT_THUMB_SRC_PATH = 100015
 EDITXT_PASSWORD = 100016
 CHK_ANIMATION = 100017
-CHK_AUTOPUBLISH = 100018
+CHK_PUBLISHDRAFT = 100018
 
 GROUP_WRAPPER = 20000
 GROUP_ONE = 20001
@@ -384,8 +384,8 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                            initw=0, inith=0, name="Password (optional):    ")
         self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT,
                          initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
-        self.AddCheckbox(id=CHK_AUTOPUBLISH, flags=c4d.BFH_LEFT,
-                         initw=0, inith=0, name="Auto-publish model")
+        self.AddCheckbox(id=CHK_PUBLISHDRAFT, flags=c4d.BFH_LEFT,
+                         initw=0, inith=0, name="Publish as a draft (not visible to public immediately)")
 
     def groupFiveWillRedraw(self):
         self.LayoutFlushGroup(GROUP_FIVE)
@@ -463,7 +463,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                         cols=2,
                         rows=1)
 
-        self.GroupSpace(10, 10)
+        self.GroupSpace(50, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
 
         self.AddStaticText(id=TXT_MODEL_NAME, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="Model name:")
@@ -476,13 +476,13 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                         cols=2,
                         rows=1)
 
-        self.GroupSpace(10, 10)
+        self.GroupSpace(56, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
 
-        self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_RIGHT | c4d.BFV_TOP,
-                           initw=0, inith=0, name=" Description: ")
+        self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_LEFT | c4d.BFV_TOP,
+                           initw=0, inith=0, name="Description:")
         self.AddMultiLineEditText(id=EDITXT_DESCRIPTION, flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT,
-                                  initw=0, inith=100, style=c4d.DR_MULTILINE_MONOSPACED)
+                                  initw=0, inith=100, style=c4d.DR_MULTILINE_WORDWRAP)
 
         self.GroupEnd()
 
@@ -491,14 +491,14 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                         cols=2,
                         rows=2)
 
-        self.GroupSpace(10, 10)
+        self.GroupSpace(11, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
-        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="   Tags: cinema4d ")
+        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Tags: cinema4d ")
         self.AddEditText(id=EDITXT_TAGS, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
 
-        self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="    API token:")
-        self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_SCALEFIT,
-                         initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_LEFT, initw=0, inith=0, name="API token:")
+        self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_FIT,
+                         initw=32, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
 
         self.AddCheckbox(id=CHK_ANIMATION, flags=c4d.BFH_RIGHT,
                          initw=0, inith=0, name="Enable animation")
@@ -686,7 +686,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             private = self.GetBool(CHK_PRIVATE)
             password = self.GetString(EDITXT_PASSWORD)
             enable_animation = self.GetBool(CHK_ANIMATION)
-            auto_publish = self.GetBool(CHK_AUTOPUBLISH)
+            auto_publish = not(self.GetBool(CHK_PUBLISHDRAFT))
 
             if '-' in token:
                 try:
@@ -721,9 +721,23 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 c4d.StatusClear()
                 return False
 
+            if len(title) > 32:
+                gui.MessageDialog("The model name should not have more than 64 characters.", c4d.GEMB_OK)
+                self.Enable(BTN_PUBLISH, True)
+                self.SetTitle(__plugin_title__)
+                c4d.StatusClear()
+                return False
+
             if len(api_token) == 0:
                 gui.MessageDialog("Please enter your API token. \
 Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
+                self.Enable(BTN_PUBLISH, True)
+                self.SetTitle(__plugin_title__)
+                c4d.StatusClear()
+                return False
+
+            if (len(description) > 1024):
+                gui.MessageDialog("Please use a description with less than 1024 characters", c4d.GEMB_OK)
                 self.Enable(BTN_PUBLISH, True)
                 self.SetTitle(__plugin_title__)
                 c4d.StatusClear()
