@@ -80,6 +80,8 @@ EDITXT_THUMB_SRC_PATH = 100015
 EDITXT_PASSWORD = 100016
 CHK_ANIMATION = 100017
 CHK_PUBLISHDRAFT = 100018
+BTN_SKFB_SIGNUP = 100019
+BTN_SKFB_TOKEN = 100020
 
 GROUP_WRAPPER = 20000
 GROUP_ONE = 20001
@@ -463,45 +465,38 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                         cols=2,
                         rows=1)
 
-        self.GroupSpace(50, 10)
+        self.GroupSpace(40, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
 
-        self.AddStaticText(id=TXT_MODEL_NAME, flags=c4d.BFH_RIGHT, initw=0, inith=0, name="Model name:")
+        self.AddStaticText(id=TXT_MODEL_NAME, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Model name:")
         self.AddEditText(id=EDITXT_MODEL_TITLE, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
-
-        self.GroupEnd()
-
-        self.GroupBegin(id=GROUP_THREE,
-                        flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT | c4d.BFV_TOP,
-                        cols=2,
-                        rows=1)
-
-        self.GroupSpace(56, 10)
-        self.GroupBorderSpace(6, 6, 6, 6)
 
         self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_LEFT | c4d.BFV_TOP,
                            initw=0, inith=0, name="Description:")
         self.AddMultiLineEditText(id=EDITXT_DESCRIPTION, flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT,
                                   initw=0, inith=100, style=c4d.DR_MULTILINE_WORDWRAP)
 
-        self.GroupEnd()
+        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Tags: cinema4d ")
+        self.AddEditText(id=EDITXT_TAGS, flags= c4d.BFH_RIGHT | c4d.BFH_SCALEFIT, initw=0, inith=0)
 
+        self.AddCheckbox(id=CHK_ANIMATION, flags=c4d.BFH_LEFT,
+                         initw=0, inith=0, name="Enable animation")
+
+        self.GroupEnd()
+        self.AddSeparatorH(inith=0, flags=c4d.BFH_FIT)
         self.GroupBegin(id=GROUP_FOUR,
                         flags=c4d.BFH_SCALEFIT,
-                        cols=2,
-                        rows=2)
+                        cols=4,
+                        rows=1)
 
         self.GroupSpace(11, 10)
         self.GroupBorderSpace(6, 6, 6, 6)
-        self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Tags: cinema4d ")
-        self.AddEditText(id=EDITXT_TAGS, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
 
         self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_LEFT, initw=0, inith=0, name="API token:")
-        self.AddEditText(id=EDITXT_API_TOKEN, flags=c4d.BFH_FIT,
-                         initw=32, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
-
-        self.AddCheckbox(id=CHK_ANIMATION, flags=c4d.BFH_RIGHT,
-                         initw=0, inith=0, name="Enable animation")
+        self.AddEditText(id=EDITXT_API_TOKEN,flags=c4d.BFH_SCALEFIT,
+                         initw=230, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
+        self.AddButton(id=BTN_SKFB_TOKEN, flags=c4d.BFH_RIGHT, initw=145, inith=16, name="Claim your token")
+        self.AddButton(id=BTN_SKFB_SIGNUP, flags=c4d.BFH_RIGHT, initw=130, inith=16, name="Create account")
 
         self.GroupEnd()
 
@@ -517,19 +512,10 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.GroupBorderSpace(6, 6, 6, 6)
 
         self.groupFiveWillRedraw()
-        # self.AddCheckbox(id=CHK_PRIVATE, flags=c4d.BFH_SCALEFIT | c4d.BFH_LEFT,
-        #                  initw=0, inith=0, name="Private Model (Pro User Only)")
-        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT,
-        #                    initw=0, inith=0, name="Password (optional):    ")
-        # self.AddEditText(id=EDITXT_PASSWORD, flags=c4d.BFH_SCALEFIT,
-        #                  initw=0, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
 
         self.GroupEnd()
 
         self.AddSeparatorH(inith=0, flags=c4d.BFH_FIT)
-        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Thumbnail:")
-        # self.AddEditText(id=EDITXT_THUMB_SRC_PATH, flags=c4d.BFH_SCALEFIT, initw=300, inith=12)
-        # self.AddButton(id=BTN_THUMB_SRC_PATH, flags=c4d.BFH_RIGHT, initw=30, inith=12, name="...")
 
         self.GroupBegin(id=GROUP_SIX,
                         flags=c4d.BFH_SCALEFIT | c4d.BFV_BOTTOM,
@@ -540,8 +526,6 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.GroupBorderSpace(6, 6, 6, 6)
 
         self.groupSixWillRedraw()
-        # self.AddStaticText(id=0, flags=c4d.BFH_LEFT | c4d.BFH_SCALEFIT, initw=0, inith=0, name=g_lastUpdated)
-        # self.AddButton(id=BTN_PUBLISH, flags=c4d.BFH_RIGHT | c4d.BFV_BOTTOM, initw=75, inith=16, name="Publish")
 
         self.GroupEnd()
 
@@ -655,6 +639,12 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 return False
             else:
                 self.SetString(EDITXT_THUMB_SRC_PATH, selected)
+
+        if id == BTN_SKFB_TOKEN:
+            Utilities.ESOpen_website(__sketchfab__ + '/settings/password')
+
+        if id == BTN_SKFB_SIGNUP:
+            Utilities.ESOpen_website(__sketchfab__ + '/signup')
 
         if id == CHK_PRIVATE:
             if self.GetBool(CHK_PRIVATE):
