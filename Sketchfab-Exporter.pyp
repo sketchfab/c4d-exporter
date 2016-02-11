@@ -261,7 +261,9 @@ class PublishModelThread(threading.Thread):
                 response.close()
                 g_uploaded = True
                 # Open website on model page
-                Utilities.ESOpen_website(__sketchfab__ + '/models/' + model_id)
+                result = gui.MessageDialog("Your model was succesfully uploaded to Sketchfab.com.\nClick OK to open the browser on your model page", c4d.GEMB_OKCANCEL)
+                if result == c4d.GEMB_R_OK:
+                    Utilities.ESOpen_website(__sketchfab__ + '/models/' + model_id)
             else:
                 g_error = "Invalid response from server."
 
@@ -432,6 +434,8 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
         self.MenuFinished()
 
+        docname = documents.GetActiveDocument().GetDocumentName()
+
         # ----------------------------------------------------------------------
         # Begin WRAPPER
         # ----------------------------------------------------------------------
@@ -470,11 +474,13 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
 
         self.AddStaticText(id=TXT_MODEL_NAME, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Model name:")
         self.AddEditText(id=EDITXT_MODEL_TITLE, flags=c4d.BFH_SCALEFIT, initw=0, inith=0)
+        self.SetString(EDITXT_MODEL_TITLE, docname)
 
         self.AddStaticText(id=TXT_DESCRIPTION, flags=c4d.BFH_LEFT | c4d.BFV_TOP,
                            initw=0, inith=0, name="Description:")
         self.AddMultiLineEditText(id=EDITXT_DESCRIPTION, flags=c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT,
                                   initw=0, inith=100, style=c4d.DR_MULTILINE_WORDWRAP)
+        self.SetString(EDITXT_DESCRIPTION, docname)
 
         self.AddStaticText(id=TXT_TAGS, flags=c4d.BFH_LEFT, initw=0, inith=0, name="Tags: cinema4d ")
         self.AddEditText(id=EDITXT_TAGS, flags= c4d.BFH_RIGHT | c4d.BFH_SCALEFIT, initw=0, inith=0)
@@ -578,7 +584,6 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 print("\nUnable to load preferences. Reason: ".format(err))
 
             if g_uploaded:
-                gui.MessageDialog("Your model was succesfully uploaded to Sketchfab.com.", c4d.GEMB_OK)
                 print("Your model was succesfully uploaded to Sketchfab.com.")
 
                 print("\nUpload ended on {0}".format(t))
@@ -662,9 +667,17 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
             activeDoc = documents.GetActiveDocument()
             activeDocPath = activeDoc.GetDocumentPath()
             if not os.path.exists(activeDocPath):
-                gui.MessageDialog("Please save your scene first.", c4d.GEMB_OK)
-                c4d.StatusClear()
-                return False
+                path = c4d.storage.SaveDialog(type=c4d.FILESELECTTYPE_ANYTHING, title="Please save your scene", force_suffix="c4d")
+                result = c4d.documents.SaveDocument(activeDoc,path, c4d.SAVEDOCUMENTFLAGS_0, c4d.FORMAT_C4DEXPORT)
+                c4d.documents.LoadFile(path)
+                if not result:
+                    gui.MessageDialog("Please save your scene first.", c4d.GEMB_OK)
+                    c4d.StatusClear()
+                    return False
+
+            # Set document data with newly saved document
+            activeDoc = documents.GetActiveDocument()
+            activeDocPath = activeDoc.GetDocumentPath()
 
             self.Enable(BTN_PUBLISH, False)
             self.SetTitle("{0} publishing model...".format(__plugin_title__))
