@@ -9,9 +9,9 @@ Thank you for trying out Sketchfab Exporter! Sketchfab Exporter is a plugin for 
 System Requirements
 -------------------
 
-• Apple Mac OS X v10.6 or later
-• Windows 7 or later
-• MAXON® Cinema 4D® R13 or later
+- Apple Mac OS X v10.6 or later
+- Windows 7 or later
+- MAXON® Cinema 4D® R13 or later
 
 Installation
 ------------
