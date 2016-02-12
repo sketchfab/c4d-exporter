@@ -1,8 +1,8 @@
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
-Sketchfab Exporter
-Copyright (C) 2014  Erwin Santacruz <http://990adjustments.com>
+Cinema 4D Sketchfab Exporter
+Copyright (C) 2016  Erwin Santacruz <http://990adjustments.com> and Sketchfab <https://sketchfab.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
