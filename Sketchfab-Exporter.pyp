@@ -113,7 +113,7 @@ export_options = {c4d.FBXEXPORT_LIGHTS: 1,
                   c4d.FBXEXPORT_PLA_TO_VERTEXCACHE: 0,
                   c4d.FBXEXPORT_SAVE_VERTEX_MAPS_AS_COLORS: 0,
                   c4d.FBXEXPORT_TRIANGULATE: 0,
-                  c4d.FBXEXPORT_SDS_SUBDIVISION: 0,
+                  c4d.FBXEXPORT_SDS_SUBDIVISION: 1,
                   c4d.FBXEXPORT_ASCII: 0}
 
 WRITEPATH = os.path.join(storage.GeGetStartupWritePath(), 'Sketchfab')
