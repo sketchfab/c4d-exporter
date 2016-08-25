@@ -501,7 +501,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_LEFT, initw=0, inith=0, name="API token:")
         self.AddEditText(id=EDITXT_API_TOKEN,flags=c4d.BFH_SCALEFIT,
                          initw=230, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
-        self.AddButton(id=BTN_SKFB_TOKEN, flags=c4d.BFH_RIGHT, initw=145, inith=16, name="Claim your token")
+        self.AddButton(id=BTN_SKFB_TOKEN, flags=c4d.BFH_RIGHT, initw=145, inith=16, name="Get API token")
         self.AddButton(id=BTN_SKFB_SIGNUP, flags=c4d.BFH_RIGHT, initw=130, inith=16, name="Create account")
 
         self.GroupEnd()
