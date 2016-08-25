@@ -725,7 +725,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 return False
 
             if len(title) > 32:
-                gui.MessageDialog("The model name should not have more than 64 characters.", c4d.GEMB_OK)
+                gui.MessageDialog("The model name should not have more than 32 characters.", c4d.GEMB_OK)
                 self.Enable(BTN_PUBLISH, True)
                 self.SetTitle(__plugin_title__)
                 c4d.StatusClear()
