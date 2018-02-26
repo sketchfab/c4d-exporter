@@ -14,6 +14,7 @@ Modified Date: 03/16/13
 
 import c4d
 from c4d import documents, gui, plugins, bitmaps, storage
+from c4d.threading import C4DThread
 
 import datetime
 import os
@@ -182,18 +183,18 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit\nhttp:
                 zipObject.write(os.path.join(path, 'tex', f))
 
 
-class PublishModelThread(threading.Thread):
+class PublishModelThread(C4DThread):
     """Class that publishes 3D model to Sketchfab.com."""
 
     def __init__(self, data, title, activeDoc, activeDocPath, enable_animation):
-        threading.Thread.__init__(self)
+        C4DThread.__init__(self)
         self.data = data
         self.title = title
         self.activeDoc = activeDoc
         self.activeDocPath = activeDocPath
         self.enable_animation = enable_animation
 
-    def run(self):
+    def Main(self):
         global g_uploaded
         global g_error
 
@@ -772,8 +773,8 @@ Your API token can be found in your dashboard at sketchfab.com", c4d.GEMB_OK)
             data['isPublished'] = auto_publish
 
             self.publish = PublishModelThread(data, title, activeDoc, activeDocPath, enable_animation)
-            self.publish.setDaemon(True)
-            self.publish.start()
+            self.publish.Start()
+            self.publish.Wait(True)
 
         return True
 
