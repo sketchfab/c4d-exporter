@@ -1,10 +1,10 @@
 """
-Sketchfab Exporter v1.2.2
+Sketchfab Exporter v1.3.5
 
 Copyright: Erwin Santacruz 2012 (www.990adjustments.com)
 Written for CINEMA 4D R13 - R15
 
-Name-US: Sketchfab Exporter v1.2.2
+Name-US: Sketchfab Exporter v1.3.5
 
 Description-US: Model exporter for Sketchfab.com
 
@@ -58,7 +58,7 @@ __sketchfab__ = "http://sketchfab.com"
 __twitter__ = "@990adjustments"
 __email__ = "hi@990adjustments.com"
 __plugin_title__ = "Sketchfab Exporter"
-__version__ = "1.3.0"
+__version__ = "1.3.5"
 __copyright_year__ = datetime.datetime.now().year
 __plugin_id__ = 1029390
 
