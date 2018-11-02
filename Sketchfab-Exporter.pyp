@@ -114,7 +114,7 @@ export_options = {c4d.FBXEXPORT_LIGHTS: 1,
                   c4d.FBXEXPORT_PLA_TO_VERTEXCACHE: 0,
                   c4d.FBXEXPORT_SAVE_VERTEX_MAPS_AS_COLORS: 0,
                   c4d.FBXEXPORT_TRIANGULATE: 0,
-                  c4d.FBXEXPORT_SDS_SUBDIVISION: 0,
+                  c4d.FBXEXPORT_SDS_SUBDIVISION: 1,
                   c4d.FBXEXPORT_ASCII: 0}
 
 WRITEPATH = os.path.join(storage.GeGetStartupWritePath(), 'Sketchfab')
@@ -502,7 +502,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
         self.AddStaticText(id=TXT_API_TOKEN, flags=c4d.BFH_LEFT, initw=0, inith=0, name="API token:")
         self.AddEditText(id=EDITXT_API_TOKEN,flags=c4d.BFH_SCALEFIT,
                          initw=230, inith=0, editflags=c4d.EDITTEXT_PASSWORD)
-        self.AddButton(id=BTN_SKFB_TOKEN, flags=c4d.BFH_RIGHT, initw=145, inith=16, name="Claim your token")
+        self.AddButton(id=BTN_SKFB_TOKEN, flags=c4d.BFH_RIGHT, initw=145, inith=16, name="Get API token")
         self.AddButton(id=BTN_SKFB_SIGNUP, flags=c4d.BFH_RIGHT, initw=130, inith=16, name="Create account")
 
         self.GroupEnd()
@@ -726,7 +726,7 @@ This program comes with ABSOLUTELY NO WARRANTY. For details, please visit http:/
                 return False
 
             if len(title) > 32:
-                gui.MessageDialog("The model name should not have more than 64 characters.", c4d.GEMB_OK)
+                gui.MessageDialog("The model name should not have more than 32 characters.", c4d.GEMB_OK)
                 self.Enable(BTN_PUBLISH, True)
                 self.SetTitle(__plugin_title__)
                 c4d.StatusClear()
