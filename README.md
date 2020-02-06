@@ -1,6 +1,8 @@
 Cinema4D Sketchfab Exporter
 ===========================
 
+## This plugin is now deprecated. Its functionality has been migrated to the new Importer / Exporter plugin, available here: https://github.com/sketchfab/c4d-plugin
+
 Welcome!
 --------
 
@@ -80,13 +82,6 @@ Sketchfab Exporter 1.1
 Sketchfab Exporter 1.0
 
 - First "official" release!
-
-Contact, Suggestions, Bugs, Spam
---------------------------------
-
-E-Mail: support@sketchfab.com
-Web: http://sketchfab.com/
-Twitter: @sketchfab
 
 Legal
 -----
